@@ -2,7 +2,8 @@ const db = require("../data/dbConfig");
 
 module.exports = {
   getProjects,
-  getProject
+  getProject,
+  addProject
 };
 
 function getProjects() {
@@ -11,7 +12,11 @@ function getProjects() {
 
 function getProject(id) {
   return db("projects")
-    .leftJoin("actions", "projects.id", "actions.project_id")
+    .leftOuterJoin("actions", "projects.id", "actions.project_id")
     .select("*")
     .where({ "projects.id": id });
+}
+
+function addProject(project) {
+  return db("projects").insert(project);
 }
