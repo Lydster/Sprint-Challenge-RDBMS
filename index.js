@@ -1,13 +1,20 @@
 const express = require("express");
 const helmet = require("helmet");
 const db = require("./data/dbConfig");
-const { getProjects, getProject } = require("./helpers/project-helpers");
+const {
+  getProjects,
+  getProject,
+  addProject,
+  getActions,
+  addAction
+} = require("./helpers/project-helpers");
 
 const server = express();
 
 server.use(helmet());
 server.use(express.json());
 
+//PROJECTS
 server.get("/api/projects", (req, res) => {
   getProjects()
     .then(projects => {
@@ -18,15 +25,22 @@ server.get("/api/projects", (req, res) => {
     });
 });
 
-server.post("api/projects", (req, res) => {
-  const { name, description } = req.body;
-  addProject({ name, description })
-    .then(project => {
-      req.status(200).json({ message: "Successfully added" });
-    })
-    .catch(err => {
-      res.status(500).json({ error: "Could not add project" });
+server.post("/api/projects", (req, res) => {
+  const project = req.body;
+  console.log(project);
+  if (!project.name || !project.description) {
+    res.status(404).json({
+      error: "please provide a name and description for the project."
     });
+  } else {
+    addProject(project)
+      .then(here => {
+        res.status(200).json({ message: "Successfully added" });
+      })
+      .catch(err => {
+        res.status(500).json({ error: "Could not add project" });
+      });
+  }
 });
 
 server.get("/api/projects/:id", (req, res) => {
@@ -38,6 +52,35 @@ server.get("/api/projects/:id", (req, res) => {
     .catch(err => {
       res.status(500).json({ error: "Could not get project" });
     });
+});
+//ACTIONS
+server.get("/api/actions", (req, res) => {
+  getActions()
+    .then(actions => {
+      res.status(200).json(actions);
+    })
+    .catch(err => {
+      res.status(500).json({ error: "cound not get actions." });
+    });
+});
+
+server.post("/api/actions", (req, res) => {
+  const action = req.body;
+  console.log(action);
+  if (!action.notes || !action.description || !action.project_id) {
+    res.status(404).json({
+      error:
+        "please provide a name and description and project_id for the action."
+    });
+  } else {
+    addAction(action)
+      .then(here => {
+        res.status(200).json({ message: "Successfully added" });
+      })
+      .catch(err => {
+        res.status(500).json({ error: "Could not add action" });
+      });
+  }
 });
 
 const port = 5000;
