@@ -1,7 +1,7 @@
 const express = require("express");
 const helmet = require("helmet");
 const db = require("./data/dbConfig");
-const { getProjects } = require("./helpers/project-helpers");
+const { getProjects, getProject } = require("./helpers/project-helpers");
 
 const server = express();
 
@@ -16,6 +16,17 @@ server.get("/api/projects", (req, res) => {
     })
     .catch(err => {
       res.status(500).json({ error: "cound not get projects." });
+    });
+});
+
+server.get("/api/projects/:id", (req, res) => {
+  const { id } = req.params;
+  getProject(id)
+    .then(project => {
+      res.status(200).json(project);
+    })
+    .catch(err => {
+      res.status(500).json({ error: "Could not get project" });
     });
 });
 
