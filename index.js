@@ -3,10 +3,12 @@ const helmet = require("helmet");
 const db = require("./data/dbConfig");
 const {
   getProjects,
-  getProject,
+  getProjectActions,
   addProject,
   getActions,
-  addAction
+  addAction,
+  getProject,
+  getProject1
 } = require("./helpers/project-helpers");
 
 const server = express();
@@ -47,12 +49,20 @@ server.get("/api/projects/:id", (req, res) => {
   const { id } = req.params;
   getProject(id)
     .then(project => {
-      res.status(200).json({ project });
+      if (project) {
+        return getProjectActions(id).then(actions => {
+          project.actions = actions;
+          return res.status(200).json({ project });
+        });
+      } else {
+        res.status(404).json({ error: "please provide a project id" });
+      }
     })
     .catch(err => {
       res.status(500).json({ error: "Could not get project" });
     });
 });
+
 //ACTIONS
 server.get("/api/actions", (req, res) => {
   getActions()
@@ -82,6 +92,17 @@ server.post("/api/actions", (req, res) => {
       });
   }
 });
+
+// server.get("/api/projects/:id", (req, res) => {
+//   const { id } = req.params;
+//   getProject1(id)
+//     .then(project => {
+//       res.status(200).json(project);
+//     })
+//     .catch(err => {
+//       res.status(500).json({ error: "Could not get project" });
+//     });
+// });
 
 const port = 5000;
 server.listen(port, () => {
